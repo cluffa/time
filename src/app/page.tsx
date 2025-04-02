@@ -14,7 +14,6 @@ export default function TimerApp() {
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const saveStateRef = useRef<NodeJS.Timeout | null>(null);
 
   const formatTime = (milliseconds: number) => {
     const hrs = String(Math.floor(milliseconds / 3600000)).padStart(2, "0");
@@ -28,7 +27,6 @@ export default function TimerApp() {
     // Load session data from cookies
     const savedTime = Cookies.get("elapsedTime");
     const savedIsRunning = Cookies.get("isRunning") === "true";
-    const savedStartTime = Cookies.get("startTime");
     const savedSubTimers = Cookies.get("subTimers");
     const savedActiveSubTimer = Cookies.get("activeSubTimer"); // Load active sub-timer
     const savedLastSavedTime = Cookies.get("lastSavedTime");
@@ -61,7 +59,7 @@ export default function TimerApp() {
       }
     }
 
-    if (savedIsRunning && savedStartTime) {
+    if (savedIsRunning) {
       setIsRunning(true);
       timerRef.current = setInterval(() => {
         setTime((prevTime) => prevTime + 10); // Increment by 10ms
@@ -77,9 +75,6 @@ export default function TimerApp() {
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
-      }
-      if (saveStateRef.current) {
-        clearInterval(saveStateRef.current);
       }
     };
   }, []);
@@ -116,23 +111,6 @@ export default function TimerApp() {
   }, [isRunning, activeSubTimer]);
 
   useEffect(() => {
-    // Save the app state every 15 seconds
-    saveStateRef.current = setInterval(() => {
-      Cookies.set("elapsedTime", time.toString());
-      Cookies.set("subTimers", JSON.stringify(subTimers)); // Save sub-timers state
-      Cookies.set("activeSubTimer", activeSubTimer || ""); // Save active sub-timer
-      Cookies.set("lastSavedTime", new Date().toISOString());
-      Cookies.set("isRunning", isRunning.toString());
-    }, 15000);
-
-    return () => {
-      if (saveStateRef.current) {
-        clearInterval(saveStateRef.current);
-      }
-    };
-  }, [time, subTimers, activeSubTimer, isRunning]);
-
-  useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (isRunning) {
         event.preventDefault();
@@ -152,15 +130,14 @@ export default function TimerApp() {
       setIsRunning(false);
       Cookies.set("isRunning", "false");
       Cookies.set("elapsedTime", time.toString()); // Save the current time
-      Cookies.set("lastSavedTime", new Date().toISOString());
+      Cookies.set("lastSavedTime", new Date().toISOString()); // Save the current datetime
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
     } else {
       setIsRunning(true);
-      const startTime = new Date().toISOString();
-      Cookies.set("startTime", startTime);
+      Cookies.set("lastSavedTime", new Date().toISOString()); // Save the current datetime
       Cookies.set("isRunning", "true");
       timerRef.current = setInterval(() => {
         setTime((prevTime) => prevTime + 10); // Increment by 10ms
@@ -181,7 +158,6 @@ export default function TimerApp() {
     setActiveSubTimer(null);
     Cookies.remove("elapsedTime");
     Cookies.remove("isRunning");
-    Cookies.remove("startTime");
     Cookies.remove("subTimers");
     Cookies.remove("activeSubTimer"); // Clear active sub-timer
     Cookies.remove("lastSavedTime"); // Clear saved state
@@ -211,6 +187,7 @@ export default function TimerApp() {
     }
     setActiveSubTimer(name); // Switch to the selected sub-timer
     Cookies.set("activeSubTimer", name); // Save the active sub-timer to cookies
+    Cookies.set("lastSavedTime", new Date().toISOString()); // Save the current datetime
   };
 
   const handleAddSubTimer = () => {
@@ -226,6 +203,7 @@ export default function TimerApp() {
           Cookies.set("activeSubTimer", newSubTimerName); // Save the active sub-timer to cookies
         }
         Cookies.set("subTimers", JSON.stringify(updatedSubTimers)); // Save updated sub-timers to cookies
+        Cookies.set("lastSavedTime", new Date().toISOString()); // Save the current datetime
         return updatedSubTimers;
       });
       setNewSubTimerName("");
@@ -249,9 +227,22 @@ export default function TimerApp() {
     <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-gray-100 dark:bg-gray-900 dark:text-gray-100">
       <button
         onClick={toggleMenu}
-        className="absolute top-4 left-4"
+        className="absolute top-4 left-4 w-12 h-12 flex items-center justify-center bg-gray-700 text-white rounded-full shadow hover:bg-gray-600"
       >
-        Menu
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+          className="w-6 h-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
       </button>
       {showMenu && (
         <div className="absolute top-16 left-4 bg-white dark:bg-gray-800 text-black dark:text-white p-4 rounded shadow-lg">
