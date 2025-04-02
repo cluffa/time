@@ -24,3 +24,32 @@ body {
   color: var(--color-foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+button {
+  background-color: #e5e7eb; /* Light gray by default */
+  color: #1f2937; /* Darker text for contrast */
+  border: none;
+  border-radius: 0.375rem; /* Rounded corners */
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #4b5563; /* Dark gray on hover */
+  color: #ffffff; /* White text on hover */
+  transform: translateY(-2px); /* Lift effect on hover */
+}
+
+button:focus {
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  background-color: #9ca3af; /* Disabled gray */
+  color: #d1d5db; /* Lighter text for disabled state */
+  cursor: not-allowed;
+}
