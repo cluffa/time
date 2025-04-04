@@ -34,18 +34,11 @@ button {
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 button:hover {
-  background-color: #4b5563; /* Dark gray on hover */
-  color: #ffffff; /* White text on hover */
-  transform: translateY(-2px); /* Lift effect on hover */
-}
-
-button:focus {
-  outline: 2px solid var(--color-foreground);
-  outline-offset: 2px;
+  background-color: #686d75; /* Darker gray on hover */
 }
 
 button:disabled {
